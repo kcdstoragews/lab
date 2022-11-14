@@ -22,20 +22,20 @@ https://lod-bootcamp.netapp.com
 username: *root*   
 password: *Netapp1!*
 
-5. We've prepared some exercises for you that are hosted in this github repo. To have them available on your training environment, please clone it with the following command:
+5. We've prepared some exercises for you that are hosted in this github repo. To have them available on your training environment, please clone it with the following commands:
 
-        git clone https://github.com/tobedone/kcdlondonworkshop 
+        cd /root
+        mkdir kcdlondon
+        cd kcdlondon
+        git clone https://github.com/kcdstoragews/lab 
 
     You should now have several directories available. Wherever we need files for a scenario, they are placed in the associated folder with the same name. 
 
-6. As this lab is used for different things and has a lot of stuff in it that might be confusing, please run this little cleanup script which removes all things we don't need in our workshop
-________
-=> All in One Script von Yves recyclen?
-________
+6. As this lab is used for different things and has a lot of stuff in it that might be confusing, please run this little cleanup script which removes all things we don't need in our workshop, updates the environment to a recent version and creates some necessary stuff.   
+Please run the following commands:
 
-        sh cleanup.sh
-
-Ok, we are ready to go, have fun with the workshop
+       cd /root/kcdlondon/lab/prework
+       sh prework.sh
 
 
 ## Scenario 01 - storage classes, persistent volumes & persistent volume claims
