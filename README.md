@@ -29,7 +29,7 @@ password: *Netapp1!*
         cd kcdlondon
         git clone https://github.com/kcdstoragews/lab 
 
-    You should now have several directories available. Wherever we need files for a scenario, they are placed in the associated folder with the same name. 
+    You should now have several directories available. Wherever you need files for a scenario, they are placed in the associated folder with the same name. 
 
 6. As this lab is used for different things and has a lot of stuff in it that might be confusing, please run this little cleanup script which removes all things we don't need in our workshop, updates the environment to a recent version and creates some necessary stuff.   
 Please run the following commands:
@@ -43,20 +43,20 @@ ____
 **Remember All needed files are in the folder /root/kcdlondon/lab/scenario01 please ensure that you are in this folder now you can do this with the command "cd root/kcdlondon/lab/scenario01"**
 ____
 In this scenario, you will create two storage classes, discovery their capabilities, create pvcs and do some basic troubleshooting. 
-
-We are using NetApp Astra Trident in this lab. It is running in the namespace *trident*.
+### 1. Backends and storage classes
+You are using NetApp Astra Trident in this lab. It is running in the namespace *trident*.
 The backends in this environment are allready created. Take a short time to review them:
 
     kubectl get tbe -n trident
 
 First let's create two storage classes. We've prepared the necessary file already in the folder. There is one storage class prepared for the nas backend and one for san.
 
-The file we will use for nas is called *sc-csi-ontap-nas.yaml*  
+The file you will use for nas is called *sc-csi-ontap-nas.yaml*  
 The command...
 
     cat sc-csi-ontap-nas.yaml 
 
-...will provide us the following output of the file:
+...will provide you the following output of the file:
 
     apiVersion: storage.k8s.io/v1
     kind: StorageClass
@@ -70,7 +70,7 @@ The command...
       storagePools: "nas-default:aggr1"
     allowVolumeExpansion: true 
 
-We can see the following things:
+You can see the following things:
 1. This storace class will be the default in this cluster (look at annotations)
 2. NetApp Astra Trident is responsible for the provisioning of PVCs with this storage class (look at provisioner)
 3. There are some parameters needed for this provisioner. In our case we have to tell them the backend type and also where to create the volumes
@@ -80,7 +80,7 @@ Now let's compare with the one for san:
 
     cat sc-csi-ontap-san-eco.yaml
 
-We get a quiet similar output here:
+You get a quiet similar output here:
 
     apiVersion: storage.k8s.io/v1
     kind: StorageClass
@@ -97,15 +97,38 @@ We get a quiet similar output here:
     allowVolumeExpansion: true
 
 The biggest differences are: 
-1. As we now asking for a block device, we need a file system on it to make a usage possible. *ext*4 is specified here (look at fsType in parameters Section)
+1. As you are now asking for a block device, you will need a file system on it to make a usage possible. *ext*4 is specified here (look at fsType in parameters Section)
 2. A reclaim policy is specified. What this means will be tested in a scenario later.
 
 If you want to dive into the whole concept of storage classes, this is well documented here: https://kubernetes.io/docs/concepts/storage/storage-classes/
 
-After all this theory, let's just add the storace classes to you cluster:
+After all this theory, let's just add the storace classes to your cluster:
 
      kubectl create -f sc-csi-ontap-nas.yaml
      kubectl create -f sc-csi-ontap-san-eco.yaml 
+
+You can discover all existing storage clusters with a simple command:
+
+    kubectl get sc
+
+If you want to see more details a *describe* will show you way more details. Let's do this
+
+    kubectl describe sc storage-class-nas
+
+The output shows you all details. Remember, we haven't specified a *reclaimPolicy*. Therefore the default vaule of *delete* could be observed in the output. Again, we will find out what the difference is, a little bit later.
+
+### 2. PVCs & PVs
+
+As your cluster has now a CSI driver installed, specified backends and also ready to use storage classes, you are set to ask for storage. But don't be afraid. You will not have to open a ticket at your storage guys or do some weird storage magic. We want a persistent volume, so let's claim one.  
+This is done with a so called persistent volume claim. 
+
+There are two files in your scenario01 folder, *firstpvc.yaml* and *secondpvc.yaml* both a requesting a 5GiB Volume, now let's get this storage into a namespace we create first and call it *funwithpvcs*...
+
+    kubectl create namespace funwithpvcs
+    kubectl apply -f firstpvc.yaml -n funwithpvcs
+    kubectl apply -f secondpvc.yaml -n funwithpvcs
+
+
 
 ## Scenario 02 - running out of space? Let's expand the volume
 Sometimes you need more space than you thought before. For sure you could create a new volume, copy the data and work with the new bigger one but it is way easier, to just expand the existing.
