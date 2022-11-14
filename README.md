@@ -11,7 +11,7 @@ It will provide you a K8s Cluster Version 1.22.3, a preconfigures storage system
 ## Preparation
 
 1. Plesase choose a Username from the following Document:  
-https://hierstehtdanneingoogledoc
+https://tinyurl.com/kcdlondon
 
 2. Access the lab environment:  
 https://lod-bootcamp.netapp.com
