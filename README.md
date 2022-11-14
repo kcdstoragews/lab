@@ -40,7 +40,7 @@ Please run the following commands:
 
 ## Scenario 01 - storage classes, persistent volumes & persistent volume claims
 ____
-**Remember** All needed files are in the folder /root/kcdlondon/lab/scenario01
+**Remember All needed files are in the folder /root/kcdlondon/lab/scenario01 please ensure that you are in this folder now you can do this with the command "cd root/kcdlondon/lab/scenario01"**
 ____
 In this scenario, you will create two storage classes, discovery their capabilities, create pvcs and do some basic troubleshooting. 
 
@@ -51,11 +51,61 @@ The backends in this environment are allready created. Take a short time to revi
 
 First let's create two storage classes. We've prepared the necessary file already in the folder. There is one storage class prepared for the nas backend and one for san.
 
-Review them and apply them afterwards.
-________
-=> todo: copy the storageclasses sc-csi-ontap-nas.yaml (SC2) and backend-san-eco-default.yaml(SC5)
-___________
+The file we will use for nas is called *sc-csi-ontap-nas.yaml*  
+The command...
 
+    cat sc-csi-ontap-nas.yaml 
+
+...will provide us the following output of the file:
+
+    apiVersion: storage.k8s.io/v1
+    kind: StorageClass
+    metadata:
+      name: storage-class-nas
+      annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
+    provisioner: csi.trident.netapp.io
+    parameters:
+      backendType: "ontap-nas"
+      storagePools: "nas-default:aggr1"
+    allowVolumeExpansion: true 
+
+We can see the following things:
+1. This storace class will be the default in this cluster (look at annotations)
+2. NetApp Astra Trident is responsible for the provisioning of PVCs with this storage class (look at provisioner)
+3. There are some parameters needed for this provisioner. In our case we have to tell them the backend type and also where to create the volumes
+4. This volume could be expanded after it's creation.
+
+Now let's compare with the one for san:
+
+    cat sc-csi-ontap-san-eco.yaml
+
+We get a quiet similar output here:
+
+    apiVersion: storage.k8s.io/v1
+    kind: StorageClass
+    metadata:
+      name: storage-class-san-economy
+    provisioner: csi.trident.netapp.io
+    parameters:
+      backendType: "ontap-san-economy"
+      storagePools: "san-eco:aggr1"
+      fsType: "ext4"
+    mountOptions:
+      - discard
+    reclaimPolicy: Retain
+    allowVolumeExpansion: true
+
+The biggest differences are: 
+1. As we now asking for a block device, we need a file system on it to make a usage possible. *ext*4 is specified here (look at fsType in parameters Section)
+2. A reclaim policy is specified. What this means will be tested in a scenario later.
+
+If you want to dive into the whole concept of storage classes, this is well documented here: https://kubernetes.io/docs/concepts/storage/storage-classes/
+
+After all this theory, let's just add the storace classes to you cluster:
+
+     kubectl create -f sc-csi-ontap-nas.yaml
+     kubectl create -f sc-csi-ontap-san-eco.yaml 
 
 ## Scenario 02 - running out of space? Let's expand the volume
 Sometimes you need more space than you thought before. For sure you could create a new volume, copy the data and work with the new bigger one but it is way easier, to just expand the existing.
