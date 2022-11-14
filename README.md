@@ -1,4 +1,4 @@
-# Everything you always wanted to know about storage in Kubernetes (But were too afraid to ask)
+# :trident: Everything you always wanted to know about storage in Kubernetes (But were too afraid to ask) :trident:
 
 # Introduction
 
@@ -38,7 +38,7 @@ Please run the following commands:
        sh prework.sh
 
 
-## :trident: Scenario 01 - storage classes, persistent volumes & persistent volume claims
+## :trident: Scenario 01 - storage classes, persistent volumes & persistent volume claims :trident:
 ____
 **Remember All needed files are in the folder /root/kcdlondon/lab/scenario01 please ensure that you are in this folder now you can do this with the command "cd root/kcdlondon/lab/scenario01"**
 ____
@@ -130,7 +130,7 @@ There are two files in your scenario01 folder, *firstpvc.yaml* and *secondpvc.ya
 
 
 
-## Scenario 02 - running out of space? Let's expand the volume
+## :trident: Scenario 02 - running out of space? Let's expand the volume :trident:
 Sometimes you need more space than you thought before. For sure you could create a new volume, copy the data and work with the new bigger one but it is way easier, to just expand the existing.
 
 First lets's create a PVC and a Centos POD using this PVC, in their own namespace.
@@ -160,14 +160,14 @@ busyboxfile   0/1     ContainerCreating   0          5s
 busyboxfile   1/1     Running             0          15s
 
 
-## Scenario 03 snapshots, clones etc
+## :trident: Scenario 03 snapshots, clones etc :trident:
 
 Szenario 13
 
-## Scenario 04 Deployments, Stateful sets etc
+## :trident: Scenario 04 Deployments, Stateful sets etc :trident:
 
 Szenario 11
 
-## Scenario 05
+## :trident: Scenario 05 :trident:
 
-## Scenario 04
+## :trident: Scenario 04 :trident:
