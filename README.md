@@ -39,6 +39,9 @@ Please run the following commands:
 
 
 ## Scenario 01 - storage classes, persistent volumes & persistent volume claims
+____
+**Remember** All needed files are in the folder /root/kcdlondon/lab/scenario01
+____
 In this scenario, you will create two storage classes, discovery their capabilities, create pvcs and do some basic troubleshooting. 
 
 We are using NetApp Astra Trident in this lab. It is running in the namespace *trident*.
