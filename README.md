@@ -197,7 +197,7 @@ Have a look at the file for the pvc and create it afterwards:
 
 Now as the PVC is there, Have a look at the file for the deployment and create it afterwards:
 
-    kubectl create -f ghost-deployment.yaml -n ghost
+    kubectl create -f ghost-deploy.yaml -n ghost
 
 We have an app, we have storage for the app, to access it we finally need a service:
 
