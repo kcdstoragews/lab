@@ -146,5 +146,5 @@ cd /root/kcdlondon/lab/prework
 
 kubectl create -n trident -f secret_ontap_nfs-svm_username.yaml
 kubectl create -n trident -f secret_ontap_iscsi-svm_chap.yaml
-kubectl create -n trident -f backend_nas-default.yaml
-kubectl create -n trident -f backend_san-eco.yaml
+kubectl create -n trident -f backend_nas.yaml
+kubectl create -n trident -f backend_san.yaml
