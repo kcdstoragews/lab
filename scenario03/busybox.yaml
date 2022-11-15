@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: busybox
-        image: quay.io/trident-mirror/kcduk/busybox:1.35.0
+        image: quay.io/trident-mirror/kcduk/busybox:1.31.1
         imagePullPolicy: IfNotPresent
         command: ['sleep', '3600']        
         volumeMounts:
