@@ -11,27 +11,27 @@ if [[ $(yum info jq -y 2> /dev/null | grep Repo | awk '{ print $3 }') != "instal
     yum install -y jq
 fi
 
-if [[  $(docker images | grep registry | grep trident | grep 22.07.0 | wc -l) -eq 0 ]]; then
-  if [ $# -eq 2 ]; then
-    sh pull_images.sh $1 $2  
-  else
-    TOKEN=$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-    RATEREMAINING=$(curl --head -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep -i ratelimit-remaining | cut -d ':' -f 2 | cut -d ';' -f 1 | cut -b 1- | tr -d ' ')
-
-    if [[ $RATEREMAINING -lt 20 ]];then
-      echo "---------------------------------------------------------------------------------------------------------------------------"
-      echo "- Your anonymous login to the Docker Hub does not have many pull requests left ($RATEREMAINING). Consider using your own credentials"
-      echo "---------------------------------------------------------------------------------------------------------------------------"
-      echo
-      echo "Please restart the script with the following parameters:"
-      echo " - Parameter1: Docker hub login"
-      echo " - Parameter2: Docker hub password"
-      exit 0
-    else
-      sh pull_images.sh
-    fi
-  fi
-fi
+#if [[  $(docker images | grep registry | grep trident | grep 22.07.0 | wc -l) -eq 0 ]]; then
+#  if [ $# -eq 2 ]; then
+#    sh pull_images.sh $1 $2  
+#  else
+#    TOKEN=$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+#    RATEREMAINING=$(curl --head -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/#latest 2>&1 | grep -i ratelimit-remaining | cut -d ':' -f 2 | cut -d ';' -f 1 | cut -b 1- | tr -d ' ')
+#
+#    if [[ $RATEREMAINING -lt 20 ]];then
+#      echo #"---------------------------------------------------------------------------------------------------------------------------"
+#      echo "- Your anonymous login to the Docker Hub does not have many pull requests left ($RATEREMAINING). Consider using your #own credentials"
+#      echo #"---------------------------------------------------------------------------------------------------------------------------"
+#      echo
+#      echo "Please restart the script with the following parameters:"
+#      echo " - Parameter1: Docker hub login"
+#      echo " - Parameter2: Docker hub password"
+#      exit 0
+#    else
+#      sh pull_images.sh
+#    fi
+#  fi
+#fi
 
 echo "#######################################################################################################"
 echo "Add Region & Zone labels to Kubernetes nodes"
@@ -116,9 +116,13 @@ echo "##########################################################################
 echo "Install new Trident Operator (22.07.0) with Helm"
 echo "#######################################################################################################"
 
-helm repo add netapp-trident https://netapp.github.io/trident-helm-chart  
+helm repo add netapp-trident https://netapp.github.io/trident-helm-chart
 helm repo update
-helm install trident netapp-trident/trident-operator --version 22.7.0 -n trident --create-namespace --set tridentAutosupportImage=registry.demo.netapp.com/trident-autosupport:22.07.0,operatorImage=registry.demo.netapp.com/trident-operator:22.07.0,tridentImage=registry.demo.netapp.com/trident:22.07.0
+helm install trident netapp-trident/trident-operator --version 22.7.0 --namespace trident --create-namespace --set imageRegistry=quay.io/trident-mirror/full
+
+#helm repo add netapp-trident https://netapp.github.io/trident-helm-chart  
+#helm repo update
+#helm install trident netapp-trident/trident-operator --version 22.7.0 -n trident --create-namespace --set #tridentAutosupportImage=registry.demo.netapp.com/trident-autosupport:22.07.0,operatorImage=registry.demo.netapp.com/#trident-operator:22.07.0,tridentImage=registry.demo.netapp.com/trident:22.07.0
 
 echo "#######################################################################################################"
 echo "Check"
