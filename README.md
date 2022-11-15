@@ -221,7 +221,7 @@ The data is there, perfect. If you want to, you can easily clean up a little bit
 
     kubectl delete ns ghost
 
-## :trident: Scenario 02 - running out of space? Let's expand the volume 
+# :trident: Scenario 02 - running out of space? Let's expand the volume 
 ____
 **Remember All needed files are in the folder */root/kcdlondon/lab/scenario02* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario02*"**
 ____
