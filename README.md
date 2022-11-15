@@ -40,7 +40,7 @@ Please run the following commands:
 
 ## :trident: Scenario 01 - storage classes, persistent volumes & persistent volume claims 
 ____
-**Remember All needed files are in the folder /root/kcdlondon/lab/scenario01 please ensure that you are in this folder now you can do this with the command "cd root/kcdlondon/lab/scenario01"**
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario01* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario01*"**
 ____
 In this scenario, you will create two StorageClasses, discovery their capabilities, create pvcs and do some basic troubleshooting. 
 ### 1. Backends and StorageClasses
