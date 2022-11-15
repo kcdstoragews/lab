@@ -102,23 +102,23 @@ kubectl delete ClusterRoleBinding trident-operator
 kubectl delete namespace trident
 
 echo "#######################################################################################################"
-echo "Download Trident 22.07.0"
+echo "Download Trident 22.10.0"
 echo "#######################################################################################################"
 
 cd
-mkdir 22.07.0 && cd 22.07.0
-wget https://github.com/NetApp/trident/releases/download/v22.07.0/trident-installer-22.07.0.tar.gz
-tar -xf trident-installer-22.07.0.tar.gz
+mkdir 22.10.0 && cd 22.10.0
+wget https://github.com/NetApp/trident/releases/download/v22.10.0/trident-installer-22.10.0.tar.gz
+tar -xf trident-installer-22.10.0.tar.gz
 rm -f /usr/bin/tridentctl
 cp trident-installer/tridentctl /usr/bin/
 
 echo "#######################################################################################################"
-echo "Install new Trident Operator (22.07.0) with Helm"
+echo "Install new Trident Operator (22.10.0) with Helm"
 echo "#######################################################################################################"
 
 helm repo add netapp-trident https://netapp.github.io/trident-helm-chart
 helm repo update
-helm install trident netapp-trident/trident-operator --version 22.7.0 --namespace trident --create-namespace --set imageRegistry=quay.io/trident-mirror/full
+helm install trident netapp-trident/trident-operator --version 22.10.0 --namespace trident --create-namespace --set imageRegistry=quay.io/trident-mirror/full
 
 #helm repo add netapp-trident https://netapp.github.io/trident-helm-chart  
 #helm repo update
@@ -141,6 +141,8 @@ tridentctl -n trident version
 echo "#######################################################################################################"
 echo "Creating Backends with kubectl"
 echo "#######################################################################################################"
+
+cd /root/kcdlondon/lab/prework
 
 kubectl create -n trident -f secret_ontap_nfs-svm_username.yaml
 kubectl create -n trident -f secret_ontap_iscsi-svm_chap.yaml
