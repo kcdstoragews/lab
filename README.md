@@ -346,6 +346,62 @@ Note that the _deletionpolicy_ parameter could also be set to _Retain_.
 
 The _volume snapshot_ feature is now ready to be tested.
 
+The following will lead you in the management of snapshots with a simple lightweight container BusyBox.
+
+We've prepared all the necessary files for you to save a little time. Please prepare the environment with the following commands:
+
+```bash
+kubectl create namespace busybox
+kubectl create -n busybox -f busybox.yaml
+kubectl get -n busybox all,pvc
+```
+The last line will provide you an output of what you have done before. There should be one running pod and a pvc with 10Gi.
+
+Before you create a snapshot so, let's create a file in our PVC, that will be deleted once the snapshot is created.  
+That way, there is a difference between the current filesystem & the snapshot content.  
+
+```bash
+kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- sh -c 'echo "KCD UK 2022 are fun" > /data/test.txt'
+```
+This creates the text file test.txt and enter the text *KCD UK 2022 are fun" into the file. You can show yourself the file with the following command:
+
+```bash
+kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- more /data/test.txt
+```
+
+Creating a snapshot of this volume is very simple:
+
+```bash
+kubectl create -n busybox -f pvc-snapshot.yaml
+```
+After it is created you can observe its details:
+```bash
+kubectl get volumesnapshot -n busybox
+```
+Your snapshot has been created !  
+
+To see an effect, you should delete the test.txt now
+```bash
+kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- rm -f /data/test.txt
+```
+
+One of the useful things of a snapshot is, that you can create a clone from this snapshot. 
+If you take a look a the PVC manifest (_pvc_from_snap.yaml_), you can notice the reference to the snapshot:
+
+```bash
+  dataSource:
+    name: mydata-snapshot
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io
+```
+
+Let's see how that turns out:
+
+```bash
+$ kubectl create -n busybox -f pvc_from_snap.yaml
+```
+This will create 
+
 
 ## :trident: Scenario 04 Deployments, Stateful sets etc 
 
