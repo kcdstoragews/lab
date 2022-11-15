@@ -576,11 +576,13 @@ Nice. What happens if we delete the app now?
 
 Note that creating this kind of pod does not display a _pvc created_ message. 
 
-# :trident: The End
+# :trident: The End :trident:
 
 Thank you for participating in this workshop we hope it was fun and you've learned something. We tried to cover the basics, there is a lot more to learn and talk. If you want to discuss further, come to our booth or feel free to reach out to us digital
 
+Hendrik Land: [Linkedin](https://www.linkedin.com/in/hendrik-land/) / [E-Mail](mailto:hendrik.land@netapp.com)
+
 Johannes Wagner: [Linkedin](https://www.linkedin.com/in/johwagner/) / [E-Mail](mailto:johannes.wagner@netapp.com)
 
-Hendrik Land: [Linkedin](https://www.linkedin.com/in/hendrik-land/) / [E-Mail](mailto:hendrik.land@netapp.com)
+
 
