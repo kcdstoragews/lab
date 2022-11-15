@@ -38,12 +38,12 @@ Please run the following commands:
        sh prework.sh
 
 
-## :trident: Scenario 01 - storage classes, persistent volumes & persistent volume claims 
+# :trident: Scenario 01 - storage classes, persistent volumes & persistent volume claims 
 ____
 **Remember All needed files are in the folder */root/kcdlondon/lab/scenario01* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario01*"**
 ____
 In this scenario, you will create two StorageClasses, discovery their capabilities, create pvcs and do some basic troubleshooting. 
-### 1. Backends and StorageClasses
+## 1. Backends and StorageClasses
 You are using NetApp Astra Trident in this lab. It is running in the namespace *trident*.
 The backends in this environment are allready created. Take a short time to review them:
 
@@ -117,7 +117,7 @@ If you want to see more details a *describe* will show you way more details. Let
 
 The output shows you all details. Remember, we haven't specified a *reclaimPolicy*. Therefore the default vaule of *Delete* could be observed in the output. Again, we will find out what the difference is, a little bit later.
 
-### 2. PVCs & PVs
+## 2. PVCs & PVs
 
 As your cluster has now a CSI driver installed, specified backends and also ready to use StorageClasses, you are set to ask for storage. But don't be afraid. You will not have to open a ticket at your storage guys or do some weird storage magic. We want a persistent volume, so let's claim one.  
 The workflow isn't complex but important to understand. As we are using Trident in this lab, we used it also for describing the workflow. However the workflow is pretty similar in all other CSI drivers.
@@ -283,7 +283,7 @@ If you want to, clean up a little bit
     kubectl delete namespace resize
 
 
-## :trident: Scenario 03 -  snapshots, clones etc 
+# :trident: Scenario 03 -  snapshots, clones etc 
 ___
 **Remember All needed files are in the folder */root/kcdlondon/lab/scenario03* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario03*"**
 ___
@@ -439,7 +439,7 @@ As in every scenario, a little clean up at the end:
 $ kubectl delete ns busybox
 ```
 
-## :trident: Scenario 04 - Consumption control 
+# :trident: Scenario 04 - Consumption control 
 ___
 **Remember All needed files are in the folder */root/kcdlondon/lab/scenario04* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario04*"**
 ___
@@ -527,7 +527,7 @@ Now that we have create a 2Gi limit, let's try to create a 5Gi volume, operation
     kubectl create -n control -f pvc-5Gi-1.yaml
 
 Magical, right? By the way, the used CSI Driver NetApp Trident has a similar parameter called _limitVolumeSize_ that controls the maximum capacity of a PVC per Trident Backend. As we told you: sometimes there are more ways than just one. 
-## :trident: Scenario 05 - About Generic Ephemeral Volumes
+# :trident: Scenario 05 - About Generic Ephemeral Volumes
 ___
 **Remember All needed files are in the folder */root/kcdlondon/lab/scenario05* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario05*"**
 ___
