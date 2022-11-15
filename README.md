@@ -222,33 +222,65 @@ The data is there, perfect. If you want to, you can easily clean up a little bit
     kubectl delete ns ghost
 
 ## :trident: Scenario 02 - running out of space? Let's expand the volume 
+____
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario02* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario02*"**
+____
 Sometimes you need more space than you thought before. For sure you could create a new volume, copy the data and work with the new bigger one but it is way easier, to just expand the existing.
 
-First lets's create a PVC and a Centos POD using this PVC, in their own namespace.
+First let's check the StorageClasses
+
+    kubectl get sc 
+
+Look at the column *ALLOWVOLUMEEXPANSION*, as we specified earlier, both StorageClasses are set to *true* which means, pvcs that are created with this StorageClass could be resized.  
+NFS Resizing was introduced in K8S 1.11, while iSCSI resizing was introduced in K8S 1.16 (CSI)
+
+Now let's create a PVC & a Centos POD using this PVC, in their own namespace.
 
     kubectl create namespace resize
     kubectl create -n resize -f pvc.yaml
-
-Review your created pvc
-
-    kubectl -n resize get pvc,pv
-
-As you can see, the created pv has 5GiB and is bound to the pvc *pvc-to-resize-file*
-
-    NAME                                       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS        AGE
-    persistentvolumeclaim/pvc-to-resize-file   Bound    pvc-7eeea3f7-1bea-458b-9824-1dd442222d55   5Gi        RWX            storage-class-nas   2s
-    NAME                                                        CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                       STORAGECLASS        REASON   AGE
-    persistentvolume/pvc-7eeea3f7-1bea-458b-9824-1dd442222d55   5Gi        RWX            Delete           Bound    resize/pvc-to-resize-file   storage-class-nas            1s
-
-Now let's create a pod that has the pvc mounted
-
     kubectl create -n resize -f pod-busybox-nas.yaml
-pod/busyboxfile created
 
-$ kubectl -n resize get pod --watch
-NAME          READY   STATUS              RESTARTS   AGE
-busyboxfile   0/1     ContainerCreating   0          5s
-busyboxfile   1/1     Running             0          15s
+Wait until the pod is in running state - you can check this with the command
+
+    kubectl get pod -n resize
+
+Finaly you should be able to see that the 5G volume is indeed mounted into the POD
+
+    kubectl -n resize exec busyboxfile -- df -h /data
+
+Resizing a PVC can be done in different ways. We will here edit the definition of the PVC & manually modify it.  
+Look for the *storage* parameter in the spec part of the definition & change the value (here for the example, we will use 15GB)
+The provided command will open the pvc definition.
+
+    kubectl -n resize edit pvc pvc-to-resize-file
+
+change the size to 15Gi like in this example:
+
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 15Gi
+      storageClassName: storage-class-nas
+      volumeMode: Filesystem
+
+you can insert something by pressing "i", exit the editor by pressing "ESC", type in :wq! to save&exit. 
+
+Everything happens dynamically without any interruption. The results can be observed with the following commands:
+
+    kubectl -n resize get pvc
+    kubectl -n resize exec busyboxfile -- df -h /data
+
+This could also have been achieved by using the _kubectl patch_ command. Try the following one:
+
+```bash
+kubectl patch -n resize pvc pvc-to-resize-file -p '{"spec":{"resources":{"requests":{"storage":"20Gi"}}}}'
+```
+
+If you want to, clean up a little bit
+
+    kubectl delete namespace resize
 
 
 ## :trident: Scenario 03 snapshots, clones etc 
