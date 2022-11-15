@@ -284,8 +284,68 @@ If you want to, clean up a little bit
 
 
 ## :trident: Scenario 03 snapshots, clones etc 
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario03* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario03*"**
+CSI Snapshots have been promoted GA with Kubernetes 1.20.  
+While snapshots can be used for many use cases, we will see here 2 different ones, which share the same beginning:
 
-Szenario 13
+- Restore the snapshot in the current application
+- Create a new POD which uses a PVC created from the snapshot
+
+There is also a chapter that will show you the impact of deletion between PVC, Snapshots & Clones (spoiler alert: no impact).  
+
+We would recommended checking that the CSI Snapshot feature is actually enabled on this platform.  
+
+This [link](https://github.com/kubernetes-csi/external-snapshotter) is a good read if you want to know more details about installing the CSI Snapshotter.  
+The **CRD** & **Snapshot-Controller** to enable this feature have already been installed in this cluster. Let's see what we find:
+
+```bash
+kubectl get crd | grep volumesnapshot
+```
+will show us the crds
+```bash
+volumesnapshotclasses.snapshot.storage.k8s.io         2020-08-29T21:08:34Z
+volumesnapshotcontents.snapshot.storage.k8s.io        2020-08-29T21:08:55Z
+volumesnapshots.snapshot.storage.k8s.io               2020-08-29T21:09:13Z
+```
+```bash
+kubectl get all -n snapshot-controller
+```
+will show us all ressources in the namespace snapshot-controller
+```bash
+NAME                                      READY   STATUS    RESTARTS         AGE
+pod/snapshot-controller-bb7675d55-7jctt   1/1     Running   12 (6d18h ago)   203d
+pod/snapshot-controller-bb7675d55-qwfns   1/1     Running   14 (6d18h ago)   203d
+
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/snapshot-controller   2/2     2            2           203d
+
+NAME                                            DESIRED   CURRENT   READY   AGE
+replicaset.apps/snapshot-controller-bb7675d55   2         2         2       203d
+```
+
+Aside from the 3 CRD & the Controller StatefulSet, the following objects have also been created during the installation of the CSI Snapshot feature:
+
+- serviceaccount/snapshot-controller
+- clusterrole.rbac.authorization.k8s.io/snapshot-controller-runner
+- clusterrolebinding.rbac.authorization.k8s.io/snapshot-controller-role
+- role.rbac.authorization.k8s.io/snapshot-controller-leaderelection
+- rolebinding.rbac.authorization.k8s.io/snapshot-controller-leaderelection
+
+Finally, you need to create a _VolumeSnapshotClass_ object that points to the Trident driver.
+
+```bash
+kubectl create -f sc-volumesnapshot.yaml
+```
+You can see this *VolumeSnapshotClass* with the following command:
+
+```bash
+kubectl get volumesnapshotclass
+```
+
+Note that the _deletionpolicy_ parameter could also be set to _Retain_.
+
+The _volume snapshot_ feature is now ready to be tested.
+
 
 ## :trident: Scenario 04 Deployments, Stateful sets etc 
 
