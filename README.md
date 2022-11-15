@@ -149,7 +149,10 @@ After you have deleted the PVC, changed the storage class in the pvc file and ap
 
     kubectl get pvc -n funwithpvcs
 
-    
+    NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS                AGE
+    firstpvc    Bound    pvc-eb00c989-fddb-4224-aa56-a8918064b9fb   5Gi        RWO            storage-class-san-economy   16m
+    secondpvc   Bound    pvc-50f6c56b-3575-43b3-ae16-5b99b35d9a59   5Gi        RWX            storage-class-nas           8s
+
 
 
 ## :trident: Scenario 02 - running out of space? Let's expand the volume 
