@@ -1,10 +1,10 @@
 apiVersion: trident.netapp.io/v1
 kind: TridentBackendConfig
 metadata:
-  name: backend-tbc-ontap-nas-default
+  name: backend-tbc-ontap-nas
 spec:
   version: 1
-  backendName: nas-default
+  backendName: nas
   storageDriverName: ontap-nas
   managementLIF: 192.168.0.135
   storagePrefix: nas1_

@@ -42,14 +42,14 @@ Please run the following commands:
 ____
 **Remember All needed files are in the folder /root/kcdlondon/lab/scenario01 please ensure that you are in this folder now you can do this with the command "cd root/kcdlondon/lab/scenario01"**
 ____
-In this scenario, you will create two storage classes, discovery their capabilities, create pvcs and do some basic troubleshooting. 
-### 1. Backends and storage classes
+In this scenario, you will create two StorageClasses, discovery their capabilities, create pvcs and do some basic troubleshooting. 
+### 1. Backends and StorageClasses
 You are using NetApp Astra Trident in this lab. It is running in the namespace *trident*.
 The backends in this environment are allready created. Take a short time to review them:
 
     kubectl get tbc -n trident
 
-First let's create two storage classes. We've prepared the necessary file already in the folder. There is one storage class prepared for the nas backend and one for san.
+First let's create two StorageClasses. We've prepared the necessary file already in the folder. There is one storage class prepared for the nas backend and one for san.
 
 The file you will use for nas is called *sc-csi-ontap-nas.yaml*  
 The command...
@@ -71,43 +71,43 @@ The command...
     allowVolumeExpansion: true 
 
 You can see the following things:
-1. This storace class will be the default in this cluster (look at annotations)
+1. This StoraceClass will be the default in this cluster (look at annotations)
 2. NetApp Astra Trident is responsible for the provisioning of PVCs with this storage class (look at provisioner)
 3. There are some parameters needed for this provisioner. In our case we have to tell them the backend type and also where to create the volumes
 4. This volume could be expanded after it's creation.
 
 Now let's compare with the one for san:
 
-    cat sc-csi-ontap-san-eco.yaml
+    cat sc-csi-ontap-san.yaml
 
 You get a quiet similar output here:
 
     apiVersion: storage.k8s.io/v1
     kind: StorageClass
     metadata:
-      name: storage-class-san-economy
+      name: storage-class-san
     provisioner: csi.trident.netapp.io
     parameters:
-      backendType: "ontap-san-economy"
-      storagePools: "san-eco:aggr1"
+      backendType: "ontap-san"
+      storagePools: "san-secured:aggr1"
       fsType: "ext4"
     mountOptions:
-      - discard
+       - discard
     reclaimPolicy: Retain
     allowVolumeExpansion: true
 
 The biggest differences are: 
 1. As you are now asking for a block device, you will need a file system on it to make a usage possible. *ext*4 is specified here (look at fsType in parameters Section)
-2. A reclaim policy is specified. What this means will be tested in a scenario later.
+2. A reclaim policy is specified. What this means will be explained.
 
 If you want to dive into the whole concept of storage classes, this is well documented here: https://kubernetes.io/docs/concepts/storage/storage-classes/
 
-After all this theory, let's just add the storace classes to your cluster:
+After all this theory, let's just add the StoraceClasses to your cluster:
 
      kubectl create -f sc-csi-ontap-nas.yaml
-     kubectl create -f sc-csi-ontap-san-eco.yaml 
+     kubectl create -f sc-csi-ontap-san.yaml 
 
-You can discover all existing storage clusters with a simple command:
+You can discover all existing StorageClasses with a simple command:
 
     kubectl get sc
 
@@ -119,8 +119,14 @@ The output shows you all details. Remember, we haven't specified a *reclaimPolic
 
 ### 2. PVCs & PVs
 
-As your cluster has now a CSI driver installed, specified backends and also ready to use storage classes, you are set to ask for storage. But don't be afraid. You will not have to open a ticket at your storage guys or do some weird storage magic. We want a persistent volume, so let's claim one.  
-This is done with a so called persistent volume claim. 
+As your cluster has now a CSI driver installed, specified backends and also ready to use StorageClasses, you are set to ask for storage. But don't be afraid. You will not have to open a ticket at your storage guys or do some weird storage magic. We want a persistent volume, so let's claim one.  
+The workflow isn't complex but important to understand. As we are using Trident in this lab, we used it also for describing the workflow. However the workflow is pretty similar in all other CSI drivers.
+
+1. A user creates a PersistentVolumeClaim requesting a new PersistentVolume of a particular size from a Kubernetes StorageClass that was previously configured by someone.
+2. The Kubernetes StorageClass identifies Trident as its provisioner and includes parameters that tell Trident how to provision a volume for the requested class.
+3. Trident looks at its own StorageClass with the same name that identifies the matching Backends and StoragePools that it can use to provision volumes for the class.
+4. Trident provisions storage on a matching backend and creates two objects: a PersistentVolume in Kubernetes that tells Kubernetes how to find, mount, and treat the volume, and a volume in Trident that retains the relationship between the PersistentVolume and the actual storage.
+5. Kubernetes binds the PersistentVolumeClaim to the new PersistentVolume. Pods that include the PersistentVolumeClaim mount that PersistentVolume on any host that it runs on.
 
 There are two files in your scenario01 folder, *firstpvc.yaml* and *secondpvc.yaml* both a requesting a 5GiB Volume, now let's get this storage into a namespace we create first and call it *funwithpvcs*...
 
@@ -137,23 +143,80 @@ Lucky that we can describe objects and see what happens!
 
     kubectl describe pvc secondpvc -n funwithpvcs
 
-Ok we can see, that there is an issue with the storage class. But why?  
-Everything that is requested in the PVC will be handed over to the provisioner that is defined in the storage class. In this case Trident gets a request for a RWX volume with 5GiB and for the backend "ontap-san-economy".   
+Ok we can see, that there is an issue with the StorageClass. But why?  
+Everything that is requested in the PVC will be handed over to the provisioner that is defined in the StorageClass. In this case Trident gets a request for a RWX volume with 5GiB and for the backend "ontap-san-economy".   
 In contrast to K8s, the CSI Driver is aware what is possible and what not. It recognizes that a RWX volume isn't possible at this backend type as this backend can only serve ROX and RWO. 
 
-If you want to have your second pvc also running and still need RWX access mode, we have to modify the yaml file. Just switch the storage class to *storage-class-nas*. This storage class has a backend type that is able to do RWX. Unfortunately a lot of things in a PVC are immutable after creation so before we can see whether your change is working or not, you have to delete the pvc again.
+If you want to have your second pvc also running and still need RWX access mode, we have to modify the yaml file. Just switch the storage class to *storage-class-nas*. This StorageClass has a backend type that is able to do RWX. Unfortunately a lot of things in a PVC are immutable after creation so before we can see whether your change is working or not, you have to delete the pvc again.
 
     kubectl delete -f secondpvc.yaml -n funwithpvcs
 
-After you have deleted the PVC, changed the storage class in the pvc file and applied it again, you should see that both pvcs are now bound.
+After you have deleted the PVC, changed the StorageClass in the pvc file and applied it again, you should see that both pvcs are now bound.
 
     kubectl get pvc -n funwithpvcs
 
     NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS                AGE
-    firstpvc    Bound    pvc-eb00c989-fddb-4224-aa56-a8918064b9fb   5Gi        RWO            storage-class-san-economy   16m
+    firstpvc    Bound    pvc-eb00c989-fddb-4224-aa56-a8918064b9fb   5Gi        RWO            storage-class-san           16m
     secondpvc   Bound    pvc-50f6c56b-3575-43b3-ae16-5b99b35d9a59   5Gi        RWX            storage-class-nas           8s
 
+Earlier we mentioned that a *PersistentVolume* is also created. Maybe you ask yourself where to see them. It is pretty easy, let's have a look at our recently created ones:
 
+    kubectl get pv -n funwithpvcs
+
+    HIER NOCH OUTPUT Hinzufügen
+
+You remember the ReclaimPolicy we definied in our StorageClass? We can see here that one PV has an other ReclaimPolicy than the other. Let's delete both PVCs and see what will happen
+
+    kubectl delete -f firstpvc.yaml -n funwithpvcs
+    kubectl delete -f secondpvc.yaml -n funwithpvcs
+
+Let's have a look how PVCs and PVs look now in our namespace
+
+    kubectl get pvc -n funwithpvcs
+    kubectl get pv -n funwithpvcs
+
+Magic, both PVCs are gone (well... we advised k8s to remove them...) but one PV is still there? No not real magic, just the normal behaviour of the specified ReclaimPolicy. As told before, the default ReclaimPolicy is *Delete*. This means as soon as the corresponding PVC is deleted, the PV will be deleted too. In some use cases this would delete valuable data. To avoid this, you can set the ReclaimPolicy to *Retain*. If the PVC is deleted now, the PV will change its Status from *Bound* to *Released*. The PV could be used again.  
+
+Awesome, you are now able to request storage...but as long as no appliaction is using that, there is no real sense of having persistent storage. Let's create an application that is able to do something with the storage. For this purpose we will use *Ghost* a light weight web portal. There are some files in our scenario01 directory:
+
+- ghost-pvc.yaml to manage the persistent storage of this app
+- ghost-deployment.yaml that will define how to manage the app
+- ghost-service.yaml to expose the app
+
+You are going to create this app in its own namespace which will be *ghost*. You will use the created StorageClass for nas.
+
+    kubectl create namespace ghost
+
+Have a look at the file for the pvc and create it afterwards:
+
+    kubectl create -f ghost-pvc.yaml -n ghost
+
+
+Now as the PVC is there, Have a look at the file for the deployment and create it afterwards:
+
+    kubectl create -f ghost-deployment.yaml -n ghost
+
+We have an app, we have storage for the app, to access it we finally need a service:
+
+    kubectl create -f ghost-service.yaml -n ghost
+
+You can see a summary of what you've done with the following command:
+
+    kubectl get -n ghost all,pvc,pv
+
+It takes about 40 seconds for the POD to be in a running state The Ghost service is configured with a NodePort type, which means you can access it from every node of the cluster on port 30080. Give it a try ! => http://192.168.0.63:30080
+
+Let's see if the */var/lib/ghost/content* folder is indeed mounted to the NFS PVC that was created.
+
+     kubectl exec -n ghost $(kubectl -n ghost get pod -o name) -- df /var/lib/ghost/content
+
+You should be able to see that it is mounted. Let's have a look into the folder
+
+    kubectl exec -n ghost $(kubectl -n ghost get pod -o name) -- ls /var/lib/ghost/content
+
+The data is there, perfect. If you want to, you can easily clean up a little bit:
+
+    kubectl delete ns ghost
 
 ## :trident: Scenario 02 - running out of space? Let's expand the volume 
 Sometimes you need more space than you thought before. For sure you could create a new volume, copy the data and work with the new bigger one but it is way easier, to just expand the existing.
