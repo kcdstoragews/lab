@@ -386,6 +386,11 @@ To see an effect, you should delete the test.txt now
 ```bash
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- rm -f /data/test.txt
 ```
+If you want to verify, that the data is really gone, feel free to try out the command from above that has shown you the text of the file:
+
+```bash
+kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- more /data/test.txt
+```
 
 One of the useful things of a snapshot is, that you can create a clone from this snapshot. 
 If you take a look a the PVC manifest (_pvc_from_snap.yaml_), you can notice the reference to the snapshot:
@@ -402,8 +407,37 @@ Let's see how that turns out:
 ```bash
 $ kubectl create -n busybox -f pvc_from_snap.yaml
 ```
-This will create 
+This will create a new pvc which could be used instantly in an application. You can see it if you have a look at the pvcs in your namespace:
 
+    kubectl get pvc -n busybox
+
+Recover the data of your application
+
+When it comes to data recovery, there are many ways to do so. If you want to recover only one file, you could browser through the .snapshot folders & copy/paste what you need. However, if you want to recover everything, you could very well update your application manifest to point to the clone, which is what we are going to see:
+
+```bash
+kubectl patch -n busybox deploy busybox -p '{"spec":{"template":{"spec":{"volumes":[{"name":"volume","persistentVolumeClaim":{"claimName":"mydata-from-snap"}}]}}}}'
+```
+
+That will trigger a new POD creation with the updated configuration
+
+Now, if you look at the files this POD has access to (the PVC), you will see that the *lost data* (file: test.txt) is back!
+
+```bash
+kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- ls -l /data/
+```
+or even better, lets have a look at the text:
+```bash
+kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- more /data/test.txt
+```
+Tadaaa, you have restored your data!  
+Keep in mind that some applications may need some extra care once the data is restored (databases for instance).  
+& that is why NetApp Astra is taking care of !
+
+As in every scenario, a little clean up at the end:
+```bash
+$ kubectl delete ns busybox
+```
 
 ## :trident: Scenario 04 Deployments, Stateful sets etc 
 
