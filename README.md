@@ -284,7 +284,9 @@ If you want to, clean up a little bit
 
 
 ## :trident: Scenario 03 snapshots, clones etc 
+___
 **Remember All needed files are in the folder */root/kcdlondon/lab/scenario03* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario03*"**
+___
 CSI Snapshots have been promoted GA with Kubernetes 1.20.  
 While snapshots can be used for many use cases, we will see here 2 different ones, which share the same beginning:
 
