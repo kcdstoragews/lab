@@ -575,4 +575,3 @@ Nice. What happens if we delete the app now?
     kubectl get pod,pvc
 
 Note that creating this kind of pod does not display a _pvc created_ message. 
-
