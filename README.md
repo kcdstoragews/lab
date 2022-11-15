@@ -163,7 +163,10 @@ Earlier we mentioned that a *PersistentVolume* is also created. Maybe you ask yo
 
     kubectl get pv -n funwithpvcs
 
-    HIER NOCH OUTPUT Hinzufügen
+    NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                   STORAGECLASS        REASON   AGE
+    pvc-0e860943-3fae-4dae-80e9-82e2259089c8   5Gi        RWX            Delete           Bound    funwithpvcs/secondpvc   storage-class-nas            99s
+    pvc-4adaf625-fc86-42e8-a481-92b02addfdbc   5Gi        RWO            Retain           Bound    funwithpvcs/firstpvc    storage-class-san            2m43s
+
 
 You remember the ReclaimPolicy we definied in our StorageClass? We can see here that one PV has an other ReclaimPolicy than the other. Let's delete both PVCs and see what will happen
 
