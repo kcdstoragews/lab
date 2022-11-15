@@ -17,7 +17,7 @@ spec:
     spec:
       initContainers:
       - name: init-mysql
-        image: quay.io/trident-mirror/kcduk/mysql:5.7.30
+        image: quay.io/trident-mirror/kcduk/mysql:5.7
         command:
         - bash
         - "-c"
@@ -65,7 +65,7 @@ spec:
           mountPath: /etc/mysql/conf.d
       containers:
       - name: mysql
-        image: quay.io/trident-mirror/kcduk/mysql:5.7.30
+        image: quay.io/trident-mirror/kcduk/mysql:5.7
         env:
         - name: MYSQL_ALLOW_EMPTY_PASSWORD
           value: "1"
