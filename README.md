@@ -283,7 +283,7 @@ If you want to, clean up a little bit
     kubectl delete namespace resize
 
 
-## :trident: Scenario 03 snapshots, clones etc 
+## :trident: Scenario 03 -  snapshots, clones etc 
 ___
 **Remember All needed files are in the folder */root/kcdlondon/lab/scenario03* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario03*"**
 ___
@@ -439,13 +439,140 @@ As in every scenario, a little clean up at the end:
 $ kubectl delete ns busybox
 ```
 
-## :trident: Scenario 04 Deployments, Stateful sets etc 
+## :trident: Scenario 04 - Consumption control 
 ___
 **Remember All needed files are in the folder */root/kcdlondon/lab/scenario04* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario04*"**
 ___
+There are many different areas you can control the consumption. We will concentrate for now on the possibilities of K8s. However please remember: Sometimes the things could also be achived at storage or csi driver level, even such things, that are not possible in K8s.
 
+You can create different objects to control the storage consumption directly in Kubernetes:
 
+- LimitRange: controls the maximum (& minimum) size for each claim in a namespace
+- ResourceQuotas: limits the number of PVC or the amount of cumulative storage in a namespace
 
-## :trident: Scenario 05 
+For this scenario we will create and work in the namespace *control*.
 
-## :trident: Scenario 04 
+You will create two types of quotas:
+
+1. limit the number of PVC a user can create
+2. limit the total capacity a user can create  
+
+    kubectl create namespace control
+    kubectl create -n control -f rq-pvc-count-limit.yaml
+    kubectl create -n control -f rq-sc-resource-limit.yaml
+
+You can see the specified ressource quotas with the following command:
+
+    kubectl get resourcequota -n control
+
+Nice they are there but what do they do? Let's have closer look:
+
+    kubectl describe quota pvc-count-limit -n control
+
+Ok we see some limitations... but how do they work? Let's create some PVCs to find out
+
+    kubectl create -n control -f pvc-quotasc-1.yaml
+    kubectl create -n control -f pvc-quotasc-2.yaml
+
+Again, have a look at the ressource limits:
+
+    kubectl describe quota pvc-count-limit -n control
+
+2 in use, great, let's add a third one
+
+    kubectl create -n control -f pvc-quotasc-3.yaml
+
+So far so good, all created, a look at our limits should tell you that you got the maximum number of PVC allowed for this storage class. Let's see what happens next...
+
+    kubectl create -n control -f pvc-quotasc-4.yaml
+
+Oh! An Error...n well that's what we expected as we want to limit the creation, right?
+Before we continue, let's clean up a little bit:
+
+    kubectl delete pvc -n control --all
+
+Time to look at the capacity quotas
+
+    kubectl describe quota sc-resource-limit -n control
+
+Each PVC you are going to use is 5GB.
+
+    kubectl create -n control -f pvc-5Gi-1.yaml
+
+A short control:
+
+    kubectl describe quota sc-resource-limit -n control
+
+Seeing the size of the second PVC file, the creation should fail in this namespace
+
+    kubectl create -n control -f pvc-5Gi-2.yaml
+
+And as expected, our limits are working. 
+
+Before starting the second part of this scenario, let's clean up
+
+    kubectl delete pvc -n control 5gb-1
+    kubectl delete resourcequota -n control --all
+
+We will use the LimitRange object type to control the maximum size of the volumes we create in a namespace. However, you can also decide to use this object type to control compute & memory limits.
+
+    kubectl create -n control -f lr-pvc.yaml
+
+Let's investigate what you've done
+
+    kubectl describe -n control limitrange storagelimits
+
+Now that we have create a 2Gi limit, let's try to create a 5Gi volume, operation that should fail.
+
+    kubectl create -n control -f pvc-5Gi-1.yaml
+
+Magical, right? By the way, the used CSI Driver NetApp Trident has a similar parameter called _limitVolumeSize_ that controls the maximum capacity of a PVC per Trident Backend. As we told you: sometimes there are more ways than just one. 
+## :trident: Scenario 05 - About Generic Ephemeral Volumes
+___
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario05* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario05*"**
+___
+When talking about Trident, we often refer to Persistent Volumes. It is indeed the most common use of such CSI driver. There are multiple benefits of using persistent volumes, one of them being that the volumes remains after the application is gone (ya, that is actually why it is called _persistent_).  
+
+For some use cases, you may need a volume for your application to store files that are absolutely not important & can be deleted alongside the application when you dont need it anymore. That is where Ephemeral Volumes could be useful.
+
+Kubernetes proposes different types of ephemeral volumes:
+
+- emptyDir
+- configMap
+- CSI ephemeral volumes 
+- **generic ephemeral volumes** 
+
+This chapter focuses on the last category which was introduced as an alpha feature in Kubernetes 1.19 (Beta in K8S 1.21 & GA in K8S 1.23).  
+
+The construct of a POD manifest with Generic Ephemeral Volumes is pretty similar to what you would see with StatefulSets, ie the volume definition is included in the POD object. This folder contains a simple busybox pod manifest. You will see that :
+
+- a volume is created alongside the POD that will mount it
+- when the POD is deleted, the volume follows the same path & disappears
+
+First let's create our app:
+
+    kubectl create -f my-app.yaml
+
+Now discover what has happened:
+
+    kubectl get pod,pvc
+
+Can we see the mount?
+
+    kubectl exec my-app -- df -h /scratch
+
+Can we write to it?
+
+    kubectl exec my-app  -- sh -c 'echo "Hello ephemaral volume" > /scratch/test.txt'
+
+Is the input really saved?
+
+    kubectl exec my-app  -- more /scratch/test.txt
+
+Nice. What happens if we delete the app now?
+
+    kubectl delete -f gev.yaml
+    kubectl get pod,pvc
+
+Note that creating this kind of pod does not display a _pvc created_ message. 
+
