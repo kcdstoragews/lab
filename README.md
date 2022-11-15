@@ -440,8 +440,35 @@ $ kubectl delete ns busybox
 ```
 
 ## :trident: Scenario 04 Deployments, Stateful sets etc 
+___
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario04* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario04*"**
+___
+StatefulSets work differently that Deployments or DaemonSets when it comes to storage.  
+Deployments & DaemonSets use PVC defined outside of them, whereas StatefulSets include the storage in their definition (cf _volumeClaimTemplates_).  
+Said differently, you can see a StatefulSet as a couple (POD + Storage). When it is scaled, both objects will be automatically created.  
+In this exercise, we will create a MySQL StatefulSet & Scale it. As we have only restricted ressources, we will just scale from 1 to 2. 
 
-Szenario 11
+Let's start by creating the application
+
+This application is based on 3 elements:
+
+- a ConfigMap, which hosts some parameter for the application
+- 2 services
+- the StatefulSet (1 replicas of the application)
+
+:mag: 
+*A* **ConfigMap** *is an API object used to store non-confidential data in key-value pairs. Pods can consume ConfigMaps as environment variables, command-line arguments, or as configuration files in a volume. A ConfigMap allows you to decouple environment-specific configuration from your container images, so that your applications are easily portable.*  
+:mag_right:  
+
+Let's create the environment
+
+```bash
+kubectl create namespace mysql
+kubectl create -n mysql -f mysql-configmap.yaml
+kubectl create -n mysql -f mysql-services.yaml
+kubectl create -n mysql -f mysql-statefulset.yaml
+```
+
 
 ## :trident: Scenario 05 
 
