@@ -137,7 +137,19 @@ Lucky that we can describe objects and see what happens!
 
     kubectl describe pvc secondpvc -n funwithpvcs
 
-This tells us, that there is an issue with the storage class. If you have a look at the yaml files of the two PVCs you should be able to see that both are requesting the same storage class which is called "storage-class-san-economy". The difference is at the AccessMode specification. While our *firstpvc* requests *ReadWriteOnce*, the *secondpvc* is asking for *ReadWriteMany*
+Ok we can see, that there is an issue with the storage class. But why?  
+Everything that is requested in the PVC will be handed over to the provisioner that is defined in the storage class. In this case Trident gets a request for a RWX volume with 5GiB and for the backend "ontap-san-economy".   
+In contrast to K8s, the CSI Driver is aware what is possible and what not. It recognizes that a RWX volume isn't possible at this backend type as this backend can only serve ROX and RWO. 
+
+If you want to have your second pvc also running and still need RWX access mode, we have to modify the yaml file. Just switch the storage class to *storage-class-nas*. This storage class has a backend type that is able to do RWX. Unfortunately a lot of things in a PVC are immutable after creation so before we can see whether your change is working or not, you have to delete the pvc again.
+
+    kubectl delete -f secondpvc.yaml -n funwithpvcs
+
+After you have deleted the PVC, changed the storage class in the pvc file and applied it again, you should see that both pvcs are now bound.
+
+    kubectl get pvc -n funwithpvcs
+
+    
 
 
 ## :trident: Scenario 02 - running out of space? Let's expand the volume 
