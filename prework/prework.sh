@@ -83,7 +83,7 @@ echo "##########################################################################
 frames="/ | \\ -"
 while [ $(kubectl get crd | grep trident | wc -l) -ne 1 ]; do
     for frame in $frames; do
-        sleep 0.5; printf "\rSleeping a bit $frame" 
+        sleep 0.5; printf "\rClean up all the clutter $frame" 
     done
 done
 echo

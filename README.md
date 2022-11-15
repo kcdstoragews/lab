@@ -27,7 +27,7 @@ password: *Netapp1!*
         cd /root
         mkdir kcdlondon
         cd kcdlondon
-        git clone https://github.com/kcdstoragews/lab 
+        git clone https://github.com/kcdstoragews/lab
 
     You should now have several directories available. Wherever you need files for a scenario, they are placed in the associated folder with the same name. 
 
@@ -47,7 +47,7 @@ In this scenario, you will create two storage classes, discovery their capabilit
 You are using NetApp Astra Trident in this lab. It is running in the namespace *trident*.
 The backends in this environment are allready created. Take a short time to review them:
 
-    kubectl get tbe -n trident
+    kubectl get tbc -n trident
 
 First let's create two storage classes. We've prepared the necessary file already in the folder. There is one storage class prepared for the nas backend and one for san.
 
@@ -115,7 +115,7 @@ If you want to see more details a *describe* will show you way more details. Let
 
     kubectl describe sc storage-class-nas
 
-The output shows you all details. Remember, we haven't specified a *reclaimPolicy*. Therefore the default vaule of *delete* could be observed in the output. Again, we will find out what the difference is, a little bit later.
+The output shows you all details. Remember, we haven't specified a *reclaimPolicy*. Therefore the default vaule of *Delete* could be observed in the output. Again, we will find out what the difference is, a little bit later.
 
 ### 2. PVCs & PVs
 
@@ -128,6 +128,16 @@ There are two files in your scenario01 folder, *firstpvc.yaml* and *secondpvc.ya
     kubectl apply -f firstpvc.yaml -n funwithpvcs
     kubectl apply -f secondpvc.yaml -n funwithpvcs
 
+Kubernetes provides the output, that both persistent volume claimes have been created. Great... or not? Let's have a look
+
+    kubectl get pvc -n funwithpvcs
+
+You can see that the PVC named *firstpvc* has a volume, and is in status *Bound*. The PVC with the name *secondpvc* looks not that healthy, it is still in Status *Pending*. This means that the request is ongoing, K8s tries to get what you want, but for whatever reason it doesn't work.   
+Lucky that we can describe objects and see what happens!
+
+    kubectl describe pvc secondpvc -n funwithpvcs
+
+This tells us, that there is an issue with the storage class. If you have a look at the yaml files of the two PVCs you should be able to see that both are requesting the same storage class which is called "storage-class-san-economy". The difference is at the AccessMode specification. While our *firstpvc* requests *ReadWriteOnce*, the *secondpvc* is asking for *ReadWriteMany*
 
 
 ## :trident: Scenario 02 - running out of space? Let's expand the volume 
