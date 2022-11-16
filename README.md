@@ -43,7 +43,10 @@ sh prework.sh
 
 # :trident: Scenario 01 - storage classes, persistent volumes & persistent volume claims 
 ____
-**Remember All needed files are in the folder */root/kcdlondon/lab/scenario01* please ensure that you are in this folder now you can do this with the command ```*cd /root/kcdlondon/lab/scenario01*```**
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario01* please ensure that you are in this folder now you can do this with the command** 
+```console
+cd /root/kcdlondon/lab/scenario01
+```
 ____
 In this scenario, you will create two StorageClasses, discovery their capabilities, create pvcs and do some basic troubleshooting. 
 ## 1. Backends and StorageClasses
@@ -59,7 +62,7 @@ First let's create two StorageClasses. We've prepared the necessary file already
 The file you will use for nas is called *sc-csi-ontap-nas.yaml*  
 The command...
 
-```
+```console
 cat sc-csi-ontap-nas.yaml
 ```
 
@@ -77,6 +80,7 @@ parameters:
   backendType: "ontap-nas"
   storagePools: "nas-default:aggr1"
 allowVolumeExpansion: true 
+```
 
 You can see the following things:
 1. This StoraceClass will be the default in this cluster (look at annotations)
@@ -225,7 +229,7 @@ Awesome, you are now able to request storage...but as long as no appliaction is 
 You are going to create this app in its own namespace which will be *ghost*. You will use the created StorageClass for nas.
 
 ```console
-    kubectl create namespace ghost
+kubectl create namespace ghost
 ```
 
 Have a look at the file for the pvc and create it afterwards:
@@ -243,7 +247,7 @@ kubectl create -f ghost-deploy.yaml -n ghost
 We have an app, we have storage for the app, to access it we finally need a service:
 
 ```console
-    kubectl create -f ghost-service.yaml -n ghost
+kubectl create -f ghost-service.yaml -n ghost
 ```
 
 You can see a summary of what you've done with the following command:
@@ -269,7 +273,7 @@ kubectl exec -n ghost $(kubectl -n ghost get pod -o name) -- ls /var/lib/ghost/c
 The data is there, perfect. If you want to, you can easily clean up a little bit:
 
 ```console
-    kubectl delete ns ghost
+kubectl delete ns ghost
 ```
 
 # :trident: Scenario 02 - running out of space? Let's expand the volume 
@@ -290,9 +294,9 @@ NFS Resizing was introduced in K8S 1.11, while iSCSI resizing was introduced in 
 Now let's create a PVC & a Centos POD using this PVC, in their own namespace.
 
 ```console
-    kubectl create namespace resize
-    kubectl create -n resize -f pvc.yaml
-    kubectl create -n resize -f pod-busybox-nas.yaml
+kubectl create namespace resize
+kubectl create -n resize -f pvc.yaml
+kubectl create -n resize -f pod-busybox-nas.yaml
 ```
 
 Wait until the pod is in running state - you can check this with the command
@@ -339,7 +343,7 @@ kubectl -n resize exec busyboxfile -- df -h /data
 
 This could also have been achieved by using the _kubectl patch_ command. Try the following one:
 
-```bash
+```console
 kubectl patch -n resize pvc pvc-to-resize-file -p '{"spec":{"resources":{"requests":{"storage":"20Gi"}}}}'
 ```
 
@@ -352,7 +356,10 @@ kubectl delete namespace resize
 
 # :trident: Scenario 03 -  snapshots, clones etc 
 ___
-**Remember All needed files are in the folder */root/kcdlondon/lab/scenario03* please ensure that you are in this folder now you can do this with the command ```*cd /root/kcdlondon/lab/scenario03***
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario03* please ensure that you are in this folder now you can do this with the command** 
+```console
+cd /root/kcdlondon/lab/scenario03
+```
 ___
 CSI Snapshots have been promoted GA with Kubernetes 1.20.  
 While snapshots can be used for many use cases, we will see here 2 different ones, which share the same beginning:
@@ -367,19 +374,24 @@ We would recommended checking that the CSI Snapshot feature is actually enabled 
 This [link](https://github.com/kubernetes-csi/external-snapshotter) is a good read if you want to know more details about installing the CSI Snapshotter.  
 The **CRD** & **Snapshot-Controller** to enable this feature have already been installed in this cluster. Let's see what we find:
 
-```bash
+```console
 kubectl get crd | grep volumesnapshot
 ```
+
 will show us the crds
+
 ```bash
 volumesnapshotclasses.snapshot.storage.k8s.io         2020-08-29T21:08:34Z
 volumesnapshotcontents.snapshot.storage.k8s.io        2020-08-29T21:08:55Z
 volumesnapshots.snapshot.storage.k8s.io               2020-08-29T21:09:13Z
 ```
-```bash
+
+```console
 kubectl get all -n snapshot-controller
 ```
+
 will show us all ressources in the namespace snapshot-controller
+
 ```bash
 NAME                                      READY   STATUS    RESTARTS         AGE
 pod/snapshot-controller-bb7675d55-7jctt   1/1     Running   12 (6d18h ago)   203d
@@ -402,12 +414,13 @@ Aside from the 3 CRD & the Controller StatefulSet, the following objects have al
 
 Finally, you need to create a _VolumeSnapshotClass_ object that points to the Trident driver.
 
-```bash
+```console
 kubectl create -f sc-volumesnapshot.yaml
 ```
+
 You can see this *VolumeSnapshotClass* with the following command:
 
-```bash
+```console
 kubectl get volumesnapshotclass
 ```
 
@@ -419,70 +432,77 @@ The following will lead you in the management of snapshots with a simple lightwe
 
 We've prepared all the necessary files for you to save a little time. Please prepare the environment with the following commands:
 
-```bash
+```console
 kubectl create namespace busybox
 kubectl create -n busybox -f busybox.yaml
 kubectl get -n busybox all,pvc
 ```
+
 The last line will provide you an output of what you have done before. There should be one running pod and a pvc with 10Gi.
 
 Before you create a snapshot so, let's create a file in our PVC, that will be deleted once the snapshot is created.  
 That way, there is a difference between the current filesystem & the snapshot content.  
 
-```bash
+```console
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- sh -c 'echo "KCD UK 2022 are fun" > /data/test.txt'
 ```
+
 This creates the text file test.txt and enter the text *KCD UK 2022 are fun" into the file. You can show yourself the file with the following command:
 
-```bash
+```console
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- more /data/test.txt
 ```
 
 Creating a snapshot of this volume is very simple:
 
-```bash
+```console
 kubectl create -n busybox -f pvc-snapshot.yaml
 ```
+
 After it is created you can observe its details:
-```bash
+```console
 kubectl get volumesnapshot -n busybox
 ```
 Your snapshot has been created !  
 
 To see an effect, you should delete the test.txt now
-```bash
+```console
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- rm -f /data/test.txt
 ```
+
 If you want to verify, that the data is really gone, feel free to try out the command from above that has shown you the text of the file:
 
-```bash
+```console
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- more /data/test.txt
 ```
 
 One of the useful things of a snapshot is, that you can create a clone from this snapshot. 
 If you take a look a the PVC manifest (_pvc_from_snap.yaml_), you can notice the reference to the snapshot:
 
-```bash
-  dataSource:
-    name: mydata-snapshot
-    kind: VolumeSnapshot
-    apiGroup: snapshot.storage.k8s.io
+```yaml
+dataSource:
+  name: mydata-snapshot
+  kind: VolumeSnapshot
+  apiGroup: snapshot.storage.k8s.io
 ```
 
 Let's see how that turns out:
 
-```bash
-$ kubectl create -n busybox -f pvc_from_snap.yaml
+```console
+kubectl create -n busybox -f pvc_from_snap.yaml
 ```
+
 This will create a new pvc which could be used instantly in an application. You can see it if you have a look at the pvcs in your namespace:
 
-    kubectl get pvc -n busybox
+```console
+kubectl get pvc -n busybox
+```
 
 Recover the data of your application
 
 When it comes to data recovery, there are many ways to do so. If you want to recover only one file, you could browser through the .snapshot folders & copy/paste what you need. However, if you want to recover everything, you could very well update your application manifest to point to the clone, which is what we are going to see:
 
-```bash
+```console
 kubectl patch -n busybox deploy busybox -p '{"spec":{"template":{"spec":{"volumes":[{"name":"volume","persistentVolumeClaim":{"claimName":"mydata-from-snap"}}]}}}}'
 ```
 
@@ -490,25 +510,31 @@ That will trigger a new POD creation with the updated configuration
 
 Now, if you look at the files this POD has access to (the PVC), you will see that the *lost data* (file: test.txt) is back!
 
-```bash
+```console
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- ls -l /data/
 ```
 or even better, lets have a look at the text:
-```bash
+
+```console
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- more /data/test.txt
 ```
+
 Tadaaa, you have restored your data!  
 Keep in mind that some applications may need some extra care once the data is restored (databases for instance).  
 & that is why NetApp Astra is taking care of !
 
 As in every scenario, a little clean up at the end:
-```bash
-$ kubectl delete ns busybox
+
+```console
+kubectl delete ns busybox
 ```
 
 # :trident: Scenario 04 - Consumption control 
 ___
-**Remember All needed files are in the folder */root/kcdlondon/lab/scenario04* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario04*"**
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario04* please ensure that you are in this folder now you can do this with the command**
+```console
+cd /root/kcdlondon/lab/scenario04
+```
 ___
 There are many different areas you can control the consumption. We will concentrate for now on the possibilities of K8s. However please remember: Sometimes the things could also be achived at storage or csi driver level, even such things, that are not possible in K8s.
 
@@ -524,79 +550,114 @@ You will create two types of quotas:
 1. limit the number of PVC a user can create
 2. limit the total capacity a user can create  
 
-    kubectl create namespace control
-    kubectl create -n control -f rq-pvc-count-limit.yaml
-    kubectl create -n control -f rq-sc-resource-limit.yaml
+```console
+kubectl create namespace control
+kubectl create -n control -f rq-pvc-count-limit.yaml
+kubectl create -n control -f rq-sc-resource-limit.yaml
+```
 
 You can see the specified ressource quotas with the following command:
 
-    kubectl get resourcequota -n control
+```console
+kubectl get resourcequota -n control
+```
 
 Nice they are there but what do they do? Let's have closer look:
 
-    kubectl describe quota pvc-count-limit -n control
+```console
+kubectl describe quota pvc-count-limit -n control
+```
 
 Ok we see some limitations... but how do they work? Let's create some PVCs to find out
 
-    kubectl create -n control -f pvc-quotasc-1.yaml
-    kubectl create -n control -f pvc-quotasc-2.yaml
+```console
+kubectl create -n control -f pvc-quotasc-1.yaml
+kubectl create -n control -f pvc-quotasc-2.yaml
+```
 
 Again, have a look at the ressource limits:
 
-    kubectl describe quota pvc-count-limit -n control
+```console
+kubectl describe quota pvc-count-limit -n control
+```
 
 2 in use, great, let's add a third one
 
-    kubectl create -n control -f pvc-quotasc-3.yaml
+```console
+kubectl create -n control -f pvc-quotasc-3.yaml
+```
 
 So far so good, all created, a look at our limits should tell you that you got the maximum number of PVC allowed for this storage class. Let's see what happens next...
 
-    kubectl create -n control -f pvc-quotasc-4.yaml
+```console
+kubectl create -n control -f pvc-quotasc-4.yaml
+```
 
 Oh! An Error...n well that's what we expected as we want to limit the creation, right?
 Before we continue, let's clean up a little bit:
 
-    kubectl delete pvc -n control --all
+```console
+kubectl delete pvc -n control --all
+```
 
 Time to look at the capacity quotas
 
-    kubectl describe quota sc-resource-limit -n control
+```console
+kubectl describe quota sc-resource-limit -n control
+```
 
 Each PVC you are going to use is 5GB.
 
-    kubectl create -n control -f pvc-5Gi-1.yaml
+```console
+kubectl create -n control -f pvc-5Gi-1.yaml
+```
 
 A short control:
 
-    kubectl describe quota sc-resource-limit -n control
+```console
+kubectl describe quota sc-resource-limit -n control
+```
 
 Seeing the size of the second PVC file, the creation should fail in this namespace
 
-    kubectl create -n control -f pvc-5Gi-2.yaml
+```console
+kubectl create -n control -f pvc-5Gi-2.yaml
+```
 
 And as expected, our limits are working. 
 
 Before starting the second part of this scenario, let's clean up
 
-    kubectl delete pvc -n control 5gb-1
-    kubectl delete resourcequota -n control --all
+```console
+kubectl delete pvc -n control 5gb-1
+kubectl delete resourcequota -n control --all
+```
 
 We will use the LimitRange object type to control the maximum size of the volumes we create in a namespace. However, you can also decide to use this object type to control compute & memory limits.
 
-    kubectl create -n control -f lr-pvc.yaml
+```console
+kubectl create -n control -f lr-pvc.yaml
+```
 
 Let's investigate what you've done
 
-    kubectl describe -n control limitrange storagelimits
+```console
+kubectl describe -n control limitrange storagelimits
+```
 
 Now that we have create a 2Gi limit, let's try to create a 5Gi volume, operation that should fail.
 
-    kubectl create -n control -f pvc-5Gi-1.yaml
+```console
+kubectl create -n control -f pvc-5Gi-1.yaml
+```
 
 Magical, right? By the way, the used CSI Driver NetApp Trident has a similar parameter called _limitVolumeSize_ that controls the maximum capacity of a PVC per Trident Backend. As we told you: sometimes there are more ways than just one. 
 # :trident: Scenario 05 - About Generic Ephemeral Volumes
 ___
-**Remember All needed files are in the folder */root/kcdlondon/lab/scenario05* please ensure that you are in this folder now you can do this with the command "*cd /root/kcdlondon/lab/scenario05*"**
+**Remember All needed files are in the folder */root/kcdlondon/lab/scenario05* please ensure that you are in this folder now you can do this with the command**
+```console
+cd /root/kcdlondon/lab/scenario05
+```
 ___
 When talking about Trident, we often refer to Persistent Volumes. It is indeed the most common use of such CSI driver. There are multiple benefits of using persistent volumes, one of them being that the volumes remains after the application is gone (ya, that is actually why it is called _persistent_).  
 
@@ -618,28 +679,40 @@ The construct of a POD manifest with Generic Ephemeral Volumes is pretty similar
 
 First let's create our app:
 
-    kubectl create -f my-app.yaml
+```console
+kubectl create -f my-app.yaml
+```
 
 Now discover what has happened:
 
-    kubectl get pod,pvc
+```console
+kubectl get pod,pvc
+```
 
 Can we see the mount?
 
-    kubectl exec my-app -- df -h /scratch
+```console
+kubectl exec my-app -- df -h /scratch
+```
 
 Can we write to it?
 
-    kubectl exec my-app  -- sh -c 'echo "Hello ephemaral volume" > /scratch/test.txt'
+```console
+kubectl exec my-app  -- sh -c 'echo "Hello ephemaral volume" > /scratch/test.txt'
+```
 
 Is the input really saved?
 
-    kubectl exec my-app  -- more /scratch/test.txt
+```console
+kubectl exec my-app  -- more /scratch/test.txt
+```
 
 Nice. What happens if we delete the app now?
 
-    kubectl delete -f gev.yaml
-    kubectl get pod,pvc
+```console
+kubectl delete -f gev.yaml
+kubectl get pod,pvc
+```
 
 Note that creating this kind of pod does not display a _pvc created_ message. 
 
