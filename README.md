@@ -752,7 +752,7 @@ kubectl exec my-app  -- more /scratch/test.txt
 Nice. What happens if we delete the app now?
 
 ```console
-kubectl delete -f gev.yaml
+kubectl delete -f my-app.yaml
 kubectl get pod,pvc
 ```
 
