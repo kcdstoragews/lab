@@ -297,7 +297,7 @@ You should be able to see that it is mounted. Let's have a look into the folder
 kubectl exec -n ghost $(kubectl -n ghost get pod -o name) -- ls /var/lib/ghost/content
 ```
 
-The data is there, perfect. If you want to, you can easily clean up a little bit:
+The data is there, perfect. If you want to, you can easily clean up a little bit befor you start with the next scenario:
 
 ```console
 kubectl delete ns ghost
