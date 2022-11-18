@@ -175,15 +175,40 @@ In contrast to K8s, the CSI Driver is aware what is possible and what not. It re
 
 If you want to have your second pvc also running and still need RWX access mode, we have to modify the yaml file. Just switch the storage class to *storage-class-nas*. This StorageClass has a backend type that is able to do RWX. Unfortunately a lot of things in a PVC are immutable after creation so before we can see whether your change is working or not, you have to delete the pvc again.
 
+<details><summary>Click for the solution</summary>
+Edit the *secondpvc.yaml* file like this:
+
 ```console
 kubectl delete -f secondpvc.yaml -n funwithpvcs
 ```
 
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: secondpvc
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: storage-class-nas
+```
+Apply the pvc again
+
+```console
+kubectl apply -f secondpvc.yaml -n funwithpvcs
+```
+</details></p>
 After you have deleted the PVC, changed the StorageClass in the pvc file and applied it again, you should see that both pvcs are now bound.
+
 
 ```console
 kubectl get pvc -n funwithpvcs
 ```
+
+
 
 ```sh
      NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS                AGE
@@ -344,6 +369,17 @@ This could also have been achieved by using the _kubectl patch_ command. Try the
 ```console
 kubectl patch -n resize pvc pvc-to-resize-file -p '{"spec":{"resources":{"requests":{"storage":"20Gi"}}}}'
 ```
+
+So increasing is easy, what about decreasing? Try to set your volume to a lower space, use the edit or the patch mechanism from above.
+
+<details><summary>Click for the solution</summary>
+
+```console
+kubectl patch -n resize pvc pvc-to-resize-file -p '{"spec":{"resources":{"requests":{"storage":"2Gi"}}}}'
+```
+</details></p>
+
+Even if it would be technically possible to decrease the size of a NFS volume, K8s just doesn't allow it. So keep in mind: Bigger ever, smaller never. 
 
 If you want to, clean up a little bit
 
