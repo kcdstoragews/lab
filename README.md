@@ -119,8 +119,8 @@ If you want to dive into the whole concept of storage classes, this is well docu
 After all this theory, let's just add the StoraceClasses to your cluster:
 
 ```console
-kubectl create -f sc-csi-ontap-nas.yaml
-kubectl create -f sc-csi-ontap-san.yaml 
+kubectl apply -f sc-csi-ontap-nas.yaml
+kubectl apply -f sc-csi-ontap-san.yaml 
 ```
 
 You can discover all existing StorageClasses with a simple command:
@@ -233,19 +233,19 @@ kubectl create namespace ghost
 Have a look at the file for the pvc and create it afterwards:
 
 ```console
-kubectl create -f ghost-pvc.yaml -n ghost
+kubectl apply -f ghost-pvc.yaml -n ghost
 ```
 
 Now as the PVC is there, Have a look at the file for the deployment and create it afterwards:
 
 ```console
-kubectl create -f ghost-deploy.yaml -n ghost
+kubectl apply -f ghost-deploy.yaml -n ghost
 ```
 
 We have an app, we have storage for the app, to access it we finally need a service:
 
 ```console
-kubectl create -f ghost-service.yaml -n ghost
+kubectl apply -f ghost-service.yaml -n ghost
 ```
 
 You can see a summary of what you've done with the following command:
@@ -293,8 +293,8 @@ Now let's create a PVC & a Centos POD using this PVC, in their own namespace.
 
 ```console
 kubectl create namespace resize
-kubectl create -n resize -f pvc.yaml
-kubectl create -n resize -f pod-busybox-nas.yaml
+kubectl apply -n resize -f pvc.yaml
+kubectl apply -n resize -f pod-busybox-nas.yaml
 ```
 
 Wait until the pod is in running state - you can check this with the command
@@ -413,7 +413,7 @@ Aside from the 3 CRD & the Controller StatefulSet, the following objects have al
 Finally, you need to create a _VolumeSnapshotClass_ object that points to the Trident driver.
 
 ```console
-kubectl create -f sc-volumesnapshot.yaml
+kubectl apply -f sc-volumesnapshot.yaml
 ```
 
 You can see this *VolumeSnapshotClass* with the following command:
@@ -432,7 +432,7 @@ We've prepared all the necessary files for you to save a little time. Please pre
 
 ```console
 kubectl create namespace busybox
-kubectl create -n busybox -f busybox.yaml
+kubectl apply -n busybox -f busybox.yaml
 kubectl get -n busybox all,pvc
 ```
 
@@ -454,7 +454,7 @@ kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- more /data/test
 Creating a snapshot of this volume is very simple:
 
 ```console
-kubectl create -n busybox -f pvc-snapshot.yaml
+kubectl apply -n busybox -f pvc-snapshot.yaml
 ```
 
 After it is created you can observe its details:
@@ -487,7 +487,7 @@ dataSource:
 Let's see how that turns out:
 
 ```console
-kubectl create -n busybox -f pvc_from_snap.yaml
+kubectl apply -n busybox -f pvc_from_snap.yaml
 ```
 
 This will create a new pvc which could be used instantly in an application. You can see it if you have a look at the pvcs in your namespace:
@@ -550,8 +550,8 @@ You will create two types of quotas:
 
 ```console
 kubectl create namespace control
-kubectl create -n control -f rq-pvc-count-limit.yaml
-kubectl create -n control -f rq-sc-resource-limit.yaml
+kubectl apply -n control -f rq-pvc-count-limit.yaml
+kubectl apply -n control -f rq-sc-resource-limit.yaml
 ```
 
 You can see the specified ressource quotas with the following command:
@@ -569,8 +569,8 @@ kubectl describe quota pvc-count-limit -n control
 Ok we see some limitations... but how do they work? Let's create some PVCs to find out
 
 ```console
-kubectl create -n control -f pvc-quotasc-1.yaml
-kubectl create -n control -f pvc-quotasc-2.yaml
+kubectl apply -n control -f pvc-quotasc-1.yaml
+kubectl apply -n control -f pvc-quotasc-2.yaml
 ```
 
 Again, have a look at the ressource limits:
@@ -582,13 +582,13 @@ kubectl describe quota pvc-count-limit -n control
 2 in use, great, let's add a third one
 
 ```console
-kubectl create -n control -f pvc-quotasc-3.yaml
+kubectl apply -n control -f pvc-quotasc-3.yaml
 ```
 
 So far so good, all created, a look at our limits should tell you that you got the maximum number of PVC allowed for this storage class. Let's see what happens next...
 
 ```console
-kubectl create -n control -f pvc-quotasc-4.yaml
+kubectl apply -n control -f pvc-quotasc-4.yaml
 ```
 
 Oh! An Error...n well that's what we expected as we want to limit the creation, right?
@@ -607,7 +607,7 @@ kubectl describe quota sc-resource-limit -n control
 Each PVC you are going to use is 5GB.
 
 ```console
-kubectl create -n control -f pvc-5Gi-1.yaml
+kubectl apply -n control -f pvc-5Gi-1.yaml
 ```
 
 A short control:
@@ -619,7 +619,7 @@ kubectl describe quota sc-resource-limit -n control
 Seeing the size of the second PVC file, the creation should fail in this namespace
 
 ```console
-kubectl create -n control -f pvc-5Gi-2.yaml
+kubectl apply -n control -f pvc-5Gi-2.yaml
 ```
 
 And as expected, our limits are working. 
@@ -634,7 +634,7 @@ kubectl delete resourcequota -n control --all
 We will use the LimitRange object type to control the maximum size of the volumes we create in a namespace. However, you can also decide to use this object type to control compute & memory limits.
 
 ```console
-kubectl create -n control -f lr-pvc.yaml
+kubectl apply -n control -f lr-pvc.yaml
 ```
 
 Let's investigate what you've done
@@ -646,7 +646,7 @@ kubectl describe -n control limitrange storagelimits
 Now that we have create a 2Gi limit, let's try to create a 5Gi volume, operation that should fail.
 
 ```console
-kubectl create -n control -f pvc-5Gi-1.yaml
+kubectl apply -n control -f pvc-5Gi-1.yaml
 ```
 
 Magical, right? By the way, the used CSI Driver NetApp Trident has a similar parameter called _limitVolumeSize_ that controls the maximum capacity of a PVC per Trident Backend. As we told you: sometimes there are more ways than just one. 
@@ -678,7 +678,7 @@ The construct of a POD manifest with Generic Ephemeral Volumes is pretty similar
 First let's create our app:
 
 ```console
-kubectl create -f my-app.yaml
+kubectl apply -f my-app.yaml
 ```
 
 Now discover what has happened:
