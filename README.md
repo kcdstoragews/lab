@@ -170,7 +170,7 @@ kubectl describe pvc secondpvc -n funwithpvcs
 ```
 
 Ok we can see, that there is an issue with the StorageClass. But why?  
-Everything that is requested in the PVC will be handed over to the provisioner that is defined in the StorageClass. In this case Trident gets a request for a RWX volume with 5GiB and for the backend "ontap-san-economy".   
+Everything that is requested in the PVC will be handed over to the provisioner that is defined in the StorageClass. In this case Trident gets a request for a RWX volume with 5GiB and for the backend "ontap-san".   
 In contrast to K8s, the CSI Driver is aware what is possible and what not. It recognizes that a RWX volume isn't possible at this backend type as this backend can only serve ROX and RWO. 
 
 If you want to have your second pvc also running and still need RWX access mode, we have to modify the yaml file. Just switch the storage class to *storage-class-nas*. This StorageClass has a backend type that is able to do RWX. Unfortunately a lot of things in a PVC are immutable after creation so before we can see whether your change is working or not, you have to delete the pvc again.
@@ -282,7 +282,8 @@ You can see a summary of what you've done with the following command:
 kubectl get -n ghost all,pvc,pv
 ```
 
-It takes about 40 seconds for the POD to be in a running state The Ghost service is configured with a NodePort type, which means you can access it from every node of the cluster on port 30080. Give it a try ! => Open the Browser in your Lab environment and go to http://192.168.0.63:30080
+It takes about 40 seconds for the POD to be in a running state The Ghost service is configured with a NodePort type, which means you can access it from every node of the cluster on port 30080.   
+Give it a try ! => Open the Browser in your Lab environment and go to http://192.168.0.63:30080
 
 Let's see if the */var/lib/ghost/content* folder is indeed mounted to the NFS PVC that was created.
 
