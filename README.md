@@ -254,7 +254,7 @@ You can see a summary of what you've done with the following command:
 kubectl get -n ghost all,pvc,pv
 ```
 
-It takes about 40 seconds for the POD to be in a running state The Ghost service is configured with a NodePort type, which means you can access it from every node of the cluster on port 30080. Give it a try ! => http://192.168.0.63:30080
+It takes about 40 seconds for the POD to be in a running state The Ghost service is configured with a NodePort type, which means you can access it from every node of the cluster on port 30080. Give it a try ! => Open the Browser in your Lab environment and go to http://192.168.0.63:30080
 
 Let's see if the */var/lib/ghost/content* folder is indeed mounted to the NFS PVC that was created.
 
