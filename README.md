@@ -78,7 +78,6 @@ metadata:
 provisioner: csi.trident.netapp.io
 parameters:
   backendType: "ontap-nas"
-  storagePools: "nas-default:aggr1"
 allowVolumeExpansion: true 
 ```
 
@@ -104,7 +103,6 @@ metadata:
 provisioner: csi.trident.netapp.io
 parameters:
   backendType: "ontap-san"
-  storagePools: "san-secured:aggr1"
   fsType: "ext4"
 mountOptions:
    - discard
