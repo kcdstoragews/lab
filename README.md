@@ -175,11 +175,13 @@ In contrast to K8s, the CSI Driver is aware what is possible and what not. It re
 If you want to have your second pvc also running and still need RWX access mode, we have to modify the yaml file. Just switch the storage class to *storage-class-nas*. This StorageClass has a backend type that is able to provide RWX mode. Unfortunately a lot of things in a PVC are immutable after creation so before we can see whether this change is working or not, you have to delete the pvc again.
 ___
 <details><summary>Click for the solution</summary>
-Edit the *secondpvc.yaml* file like this:
+Delete the pvc which is in pending state:
 
 ```console
 kubectl delete -f secondpvc.yaml -n funwithpvcs
 ```
+
+Edit the *secondpvc.yaml* file like this:
 
 ```yaml
 apiVersion: v1
