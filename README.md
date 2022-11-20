@@ -306,7 +306,10 @@ kubectl delete ns ghost
 
 # :trident: Scenario 02 - running out of space? Let's expand the volume 
 ____
-**Remember: All required files are in the folder */root/kcdlondon/lab/scenario02*. Please ensure that you are in this folder. You can do this with the command ```*cd /root/kcdlondon/lab/scenario02*```**
+**Remember: All required files are in the folder */root/kcdlondon/lab/scenario02* please ensure that you are in this folder now. You can do this with the command** 
+```console
+cd /root/kcdlondon/lab/scenario02
+```
 ____
 Sometimes you need more space than you thought before. For sure you could create a new volume, copy the data and work with the new bigger PVC but it is way easier to just expand the existing.
 
