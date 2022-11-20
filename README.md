@@ -304,7 +304,7 @@ kubectl delete ns ghost
 
 # :trident: Scenario 02 - running out of space? Let's expand the volume 
 ____
-**Remember All required files are in the folder */root/kcdlondon/lab/scenario02*. Please ensure that you are in this folder. You can do this with the command ```*cd /root/kcdlondon/lab/scenario02*```**
+**Remember: All required files are in the folder */root/kcdlondon/lab/scenario02*. Please ensure that you are in this folder. You can do this with the command ```*cd /root/kcdlondon/lab/scenario02*```**
 ____
 Sometimes you need more space than you thought before. For sure you could create a new volume, copy the data and work with the new bigger PVC but it is way easier to just expand the existing.
 
@@ -482,7 +482,7 @@ Before we create a snapshot, let's write some data into our volume.
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- sh -c 'echo "KCDUK 2022 is fun" > /data/test.txt'
 ```
 
-This creates the file test.txt and writes *KCDUK 2022 is fun" into it. You can verify the file contents:
+This creates the file test.txt and writes "KCDUK 2022 is fun" into it. You can verify the file contents:
 
 ```console
 kubectl exec -n busybox $(kubectl get pod -n busybox -o name) -- more /data/test.txt
