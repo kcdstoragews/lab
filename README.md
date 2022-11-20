@@ -3,10 +3,10 @@
 # Introduction
 
 
-You will work in the NetApp Lab on Demand environment, but we`ve prepared some more resources for you than the typical lab guide offers. Before we can start, there are some preparations to do.
+You will work in the NetApp Lab on Demand environment, but we`ve prepared some more resources for you than the typical lab guide offers. Before you can start, there are some preparations to do.
 
 You will connect to a Windows jumphost from which you can access the training environment.  
-It will provide you a K8s cluster version 1.22.3, a preconfigures storage system and the CSI driver we will use to demonstrate you how easy it is to use persistent storage in K8s.
+It will provide you a K8s cluster version 1.22.3, a preconfigured storage system and the CSI driver we will use to demonstrate you how easy it is to use persistent storage in K8s.
 
 ## Preparation
 
@@ -22,7 +22,7 @@ https://lod-bootcamp.netapp.com
 username: *root*   
 password: *Netapp1!*
 
-5. We've prepared some exercises for you that are hosted in this github repo. To have them available on your training environment, please create a directory and clone the repo with the following commands:
+5. We've prepared some exercises for you that are hosted in a github repo. To have them available on your training environment, please create a directory, enter it and clone the repo with the following commands:
 
 ```console
 cd /root
@@ -33,7 +33,7 @@ git clone https://github.com/kcdstoragews/lab
 
 You should now have several directories available. The lab is structured with different scenarios. Everything you need is placed in a folder with the same name. 
 
-6. As this lab is used for different things and has a lot of stuff in it that might be confusing, please run this little cleanup script which removes all things we don't need in our workshop, updates the environment to a recent version and creates some necessary stuff.   
+6. As this lab is used for different things and has a lot of stuff in it that might be confusing, please run this little cleanup script which removes all things you don't need in this workshop, updates the environment to a recent version and creates some necessary stuff.   
 Please run the following commands:
 
 ```console
@@ -57,9 +57,9 @@ The backends in this environment are allready created. Take a brief moment to re
 kubectl get tbc -n trident
 ```
 
-First let's create two StorageClasses. We've already prepared the necessary files. There is one storage class prepared for the nas backend and one for san.
+First let's create two StorageClasses. We've already prepared the necessary files. There is one StorageClass prepared for the *nas* backend and one for *san*.
 
-The file you will use for nas is called *sc-csi-ontap-nas.yaml*  
+The file you will use for *nas* is called *sc-csi-ontap-nas.yaml*  
 The command...
 
 ```console
@@ -87,7 +87,7 @@ You can see the following:
 3. There are some parameters needed for this provisioner. In our case we have to tell them the backend type (e.g. nas, san).
 4. This volume can be expanded after it's creation.
 
-Now let's compare with the one for san:
+Now let's compare with the one for *san*:
 
 ```console
 cat sc-csi-ontap-san.yaml
@@ -111,10 +111,10 @@ allowVolumeExpansion: true
 ```
 
 The biggest differences are: 
-1. As you are now asking for a block device, you will need a file system on it to make it usable. *ext*4 is specified here (look at fsType in parameters Section)
+1. As you are now asking for a block device, you will need a file system on it to make it usable. *ext4* is specified here (look at fsType in parameters section)
 2. A reclaim policy is specified. We will come back to this later.
 
-If you want to dive into the whole concept of storage classes, this is well documented here: https://kubernetes.io/docs/concepts/storage/storage-classes/
+If you want to dive into the whole concept of StorageClasses, this is well documented here: https://kubernetes.io/docs/concepts/storage/storage-classes/
 
 After all this theory, let's just add the StoraceClasses to your cluster:
 
@@ -135,11 +135,11 @@ If you want to see more details a *describe* will provide them. Let's do this
 kubectl describe sc storage-class-nas
 ```
 
-The output shows you all details. Remember, we haven't specified a *reclaimPolicy* for this class. Therefore the default vaule of *Delete* can be observed in the output. Again, we will look at this later.
+The output shows you all details. Remember, we haven't specified a *reclaimPolicy* for this class. Therefore the default vaule of *Delete* can be observed in the output. Again, we will explain what this means later.
 
 ## 2. PVCs & PVs
 
-As your cluster has now a CSI driver installed and also StorageClasses, you are all set to ask for storage. But don't be afraid. You will not have to open a ticket at your storage admin team or do some weird storage magic. We want a persistent volume, so let's claim one.  
+As your cluster now has a CSI driver installed and also StorageClasses configured, you are all set to ask for storage. But don't be afraid. You will not have to open a ticket at your storage admin team or do some weird storage magic. We want a persistent volume, so let's claim one.  
 The workflow isn't complex but important to understand. 
 
 1. A user creates a PersistentVolumeClaim requesting a new PersistentVolume of a particular size from a Kubernetes StorageClass that was previously configured by someone.
@@ -317,7 +317,7 @@ kubectl get sc
 Look at the column *ALLOWVOLUMEEXPANSION*. As we specified earlier, both StorageClasses are set to *true*, which means PVCs that are created with this StorageClass can be expanded.  
 NFS Resizing was introduced in K8S 1.11, while iSCSI resizing was introduced in K8S 1.16 (CSI)
 
-Now let's create a PVC & a Centos POD using this PVC, in their own namespace.
+Now let's create a PVC and a Centos POD using this PVC, in their own namespace called *resize".
 
 ```console
 kubectl create namespace resize
@@ -367,7 +367,7 @@ kubectl -n resize get pvc
 kubectl -n resize exec busyboxfile -- df -h /data
 ```
 
-This could also have been achieved by using the _kubectl patch_ command. Try the following:
+This could also have been achieved by using the *kubectl patch* command. Try the following:
 
 ```console
 kubectl patch -n resize pvc pvc-to-resize-file -p '{"spec":{"resources":{"requests":{"storage":"20Gi"}}}}'
@@ -387,7 +387,7 @@ ___
 
 Even if it would be technically possible to decrease the size of a NFS volume, K8s just doesn't allow it. So keep in mind: Bigger ever, smaller never. 
 
-If you want to, clean up a little bit
+If you want to, clean up a little bit:
 
 ```console
 kubectl delete namespace resize
@@ -448,7 +448,7 @@ Aside from the 3 CRDs & the Controller StatefulSet, the following objects have a
 - role.rbac.authorization.k8s.io/snapshot-controller-leaderelection
 - rolebinding.rbac.authorization.k8s.io/snapshot-controller-leaderelection
 
-Finally, you need to create a _VolumeSnapshotClass_ object that connects the snapshot capability with the Trident CSI driver.
+Finally, you need to create a *VolumeSnapshotClass* object that connects the snapshot capability with the Trident CSI driver.
 
 ```console
 kubectl apply -f sc-volumesnapshot.yaml
@@ -460,7 +460,7 @@ You can see this *VolumeSnapshotClass* with the following command:
 kubectl get volumesnapshotclass
 ```
 
-Note that the _deletionpolicy_ parameter could also be set to _Retain_.
+Note that the *deletionpolicy* parameter could also be set to *Retain*.
 
 The _volume snapshot_ feature is now ready to be tested.
 
