@@ -3,26 +3,26 @@
 # Introduction
 
 
-You will work in the NetApp Lab on Demand Environment, but we`ve prepared some more resources for you than the typical Lab Guide offers. Before we can start, there are some preparations to do.
+You will work in the NetApp Lab on Demand environment, but we`ve prepared some more resources for you than the typical lab guide offers. Before we can start, there are some preparations to do.
 
-You will connect to a Windows Jumphost from which you can access the training environment.  
-It will provide you a K8s Cluster Version 1.22.3, a preconfigures storage system and the CSI driver we will use to demonstrate you how easy it is to use persistent storage in K8s.
+You will connect to a Windows jumphost from which you can access the training environment.  
+It will provide you a K8s cluster version 1.22.3, a preconfigures storage system and the CSI driver we will use to demonstrate you how easy it is to use persistent storage in K8s.
 
 ## Preparation
 
-1. Plesase choose a Username from the following Document:  
+1. Plesase choose a username from the following document:  
 https://tinyurl.com/kcdlondon
 
 2. Access the lab environment:  
 https://lod-bootcamp.netapp.com
 
-3. Request the Lab *Using Trident with Kubernetes and ONTAP v5.0* and connect to the jumphost
+3. Request the lab *Using Trident with Kubernetes and ONTAP v5.0* and connect to the jumphost
 
-4. Open *Putty* and connect the the Host *rhel3* with the following credentials:  
+4. Open *Putty* and connect to the host *rhel3* with the following credentials:  
 username: *root*   
 password: *Netapp1!*
 
-5. We've prepared some exercises for you that are hosted in this github repo. To have them available on your training environment, please clone it with the following commands:
+5. We've prepared some exercises for you that are hosted in this github repo. To have them available on your training environment, please create a directory and clone the repo with the following commands:
 
 ```console
 cd /root
