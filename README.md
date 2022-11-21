@@ -740,7 +740,7 @@ kubectl exec my-app -- df -h /scratch
 Can we write to it?
 
 ```console
-kubectl exec my-app  -- sh -c 'echo "Hello ephemaral volume" > /scratch/test.txt'
+kubectl exec my-app  -- sh -c 'echo "Hello ephemeral volume" > /scratch/test.txt'
 ```
 
 Is the input really saved?
